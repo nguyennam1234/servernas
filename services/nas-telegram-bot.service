@@ -1,0 +1,16 @@
+[Unit]
+Description=NAS Telegram Bot & Server Watchdog
+After=network.target nas-drive.service
+
+[Service]
+Type=simple
+User=nguyennam
+Group=nguyennam
+WorkingDirectory=/home/nguyennam/nas-drive/backend
+ExecStart=/usr/bin/node /home/nguyennam/nas-drive/backend/telegram-bot.mjs
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,21 @@
+{
+  "name": "servernas",
+  "version": "1.0.0",
+  "description": "Private Cloud NAS (Google Drive UI) with Zero-Knowledge AES-256-GCM Vault, High-Speed Streaming & Telegram Bot Watchdog",
+  "main": "backend/server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node backend/server.mjs",
+    "bot": "node backend/telegram-bot.mjs"
+  },
+  "keywords": [
+    "nas",
+    "storage",
+    "cloud",
+    "vault",
+    "encryption",
+    "telegram-bot"
+  ],
+  "author": "Nguyen Nam",
+  "license": "MIT"
+}

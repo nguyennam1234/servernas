@@ -1,0 +1,11 @@
+{
+  "name": "nas-drive-frontend",
+  "version": "1.0.0",
+  "description": "Google Drive NAS Web Frontend",
+  "scripts": {
+    "start": "npx serve -l 3000 ."
+  },
+  "keywords": ["nas", "frontend", "drive", "ui"],
+  "author": "",
+  "license": "ISC"
+}

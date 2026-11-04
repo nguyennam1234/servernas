@@ -1,0 +1,14 @@
+{
+  "name": "nas-drive-backend",
+  "version": "1.0.0",
+  "description": "Google Drive NAS Backend Service & APIs",
+  "main": "server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "bot": "node telegram-bot.mjs"
+  },
+  "keywords": ["nas", "storage", "cloud", "api"],
+  "author": "",
+  "license": "ISC"
+}

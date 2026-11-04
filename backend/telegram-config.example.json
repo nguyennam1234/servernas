@@ -1,0 +1,11 @@
+{
+  "botToken": "YOUR_TELEGRAM_BOT_TOKEN_HERE",
+  "chatId": "YOUR_TELEGRAM_CHAT_ID_HERE",
+  "alertDiskPercent": 90,
+  "checkIntervalSeconds": 60,
+  "enablePeriodicReport": true,
+  "dailyReportHour": 8,
+  "notifyOnBoot": true,
+  "enableServiceWatchdog": true,
+  "autoRestartOnCrash": true
+}

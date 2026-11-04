@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NAS Cloud Drive — Lưu trữ 600GB NVMe</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath fill='%23ffffff' d='M8 19c-.55 0-1-.45-1-1 0-3.31 2.69-6 6-6 1.14 0 2.2.32 3.1 0.88C16.9 10.96 19.26 9.5 22 9.5c3.59 0 6.5 2.91 6.5 6.5 0 .34-.03.68-.08 1.01.95.74 1.58 1.89 1.58 3.19 0 2.21-1.79 4-4 4H10c-2.21 0-4-1.79-4-4 0-1.84 1.25-3.39 2.95-3.85C8.36 19.95 8 19.5 8 19z'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    (function() {
+      const saved = localStorage.getItem('nas_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css?v=20261103-move">
+</head>
+<body>
+  <!-- Header Topbar -->
+  <header class="drive-header">
+    <div class="header-left">
+      <button type="button" class="icon-btn mobile-menu-btn" id="mobileMenuBtn" title="Mở danh mục">
+        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+      </button>
+      <div class="drive-brand" onclick="location.reload()" title="Tải lại NAS Drive">
+        <div class="brand-logo-wrap">
+          <svg class="brand-logo-svg" viewBox="0 0 32 32">
+            <defs>
+              <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#a855f7"/>
+              </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="9" fill="url(#brandGrad)"/>
+            <path fill="#ffffff" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z" transform="translate(4, 5) scale(0.75)"/>
+          </svg>
+          <span class="brand-glow"></span>
+        </div>
+        <div class="brand-text-block">
+          <div class="brand-title-row">
+            <span class="drive-title">NAS</span>
+            <span class="drive-title-accent">Drive</span>
+            <span class="drive-badge">600GB NVMe</span>
+          </div>
+        </div>
+        <a id="netStatusBadge" class="net-badge" href="#" title="Kiểm tra trạng thái mạng">
+          <span class="net-dot"></span>
+          <span id="netStatusText">Đang kết nối...</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" id="searchInput" placeholder="Tìm tệp tin, video, thư mục..." autocomplete="off">
+        <kbd class="search-shortcut" title="Phím tắt tìm kiếm">Ctrl K</kbd>
+        <button type="button" class="search-clear-btn" id="searchClearBtn" hidden title="Xóa tìm kiếm">✕</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <a href="/NASDrive.apk" download="NASDrive.apk" class="btn-download-app" title="Tải ứng dụng Android cho điện thoại">
+        <svg viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 0 0-.1521-.5676.416.416 0 0 0-.5676.1521l-2.0223 3.503C15.5902 8.4116 13.8533 8.125 12 8.125s-3.5902.2866-5.1368.8247L4.8409 5.4467a.4161.4161 0 0 0-.5677-.1521.4157.4157 0 0 0-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.75h24c-.3432-4.0911-2.6889-7.5633-6.1185-9.4286"/></svg>
+        <span>App Android</span>
+      </a>
+      <button type="button" class="icon-btn" id="themeToggleBtn" title="Chuyển chế độ Sáng / Tối">
+        <svg id="themeSunIcon" viewBox="0 0 24 24" hidden><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
+        <svg id="themeMoonIcon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="viewToggleBtn" title="Chuyển chế độ Lưới / Danh sách">
+        <svg id="viewGridIcon" viewBox="0 0 24 24"><path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/></svg>
+        <svg id="viewListIcon" viewBox="0 0 24 24" hidden><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="refreshBtn" title="Làm mới">
+        <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+      </button>
+      <div class="user-dropdown-container">
+        <button type="button" class="user-pill" id="userPillBtn" title="Tài khoản cá nhân">
+          <span class="user-avatar" id="userAvatarText">AD</span>
+          <span class="user-name" id="userNameText">admin</span>
+          <svg class="user-chevron" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </button>
+        <div class="user-dropdown-menu" id="userDropdownMenu" hidden>
+          <div class="user-dropdown-header">
+            <div class="user-dropdown-avatar" id="userMenuAvatar">AD</div>
+            <div class="user-dropdown-info">
+              <div class="user-dropdown-name" id="userMenuFullName">Quản trị viên</div>
+              <div class="user-dropdown-role" id="userMenuRole">@admin • Quản trị</div>
+            </div>
+          </div>
+          <hr class="dropdown-divider">
+          <button type="button" class="user-dropdown-item" id="btnOpenChangePassword">
+            <svg viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+            <span>Đổi mật khẩu</span>
+          </button>
+          <button type="button" class="user-dropdown-item danger" id="btnLogout">
+            <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            <span>Đăng xuất</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- LAN Switch Recommendation Banner -->
+  <div id="lanBanner" class="lan-banner" hidden>
+    <div class="lan-banner-content">
+      <div class="lan-banner-badge">⚡ Mẹo tăng tốc 1Gbps</div>
+      <span class="lan-banner-text">
+        Bạn đang truy cập qua Cloudflare Tunnel. Nếu cùng mạng WiFi ở nhà, hãy chuyển sang <a href="http://192.168.88.230:8080" class="lan-banner-link" target="_blank">Mạng nội bộ LAN (192.168.88.230:8080)</a> để tải & xem video siêu tốc 1000Mbps!
+      </span>
+      <a href="http://192.168.88.230:8080" class="btn-lan-switch" target="_blank">Vào mạng LAN</a>
+      <button type="button" class="btn-lan-dismiss" id="dismissLanBanner" title="Đóng thông báo">✕</button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Backdrop Overlay -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+
+  <!-- Main Layout -->
+  <div class="drive-body">
+    <!-- Left Sidebar -->
+    <aside class="drive-sidebar" id="driveSidebar">
+      <!-- Create New Action Button -->
+      <div class="new-action-container">
+        <button type="button" class="btn-new-fab" id="newFabBtn">
+          <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          <span>Tải lên & Tạo mới</span>
+          <svg class="chevron-down" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </button>
+        <div class="new-dropdown" id="newDropdown" hidden>
+          <button type="button" class="new-item" id="menuNewFolder">
+            <svg class="item-icon folder-icon" viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-1 8h-3v3h-2v-3h-3v-2h3V9h2v3h3v2z"/></svg>
+            <span>Thư mục mới</span>
+          </button>
+          <hr class="dropdown-divider">
+          <button type="button" class="new-item" id="menuUploadFile">
+            <svg class="item-icon upload-icon" viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+            <span>Tải tệp lên</span>
+          </button>
+          <button type="button" class="new-item" id="menuUploadFolder">
+            <svg class="item-icon folder-up-icon" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2zm2 13-4-4h2.5V9h3v4H16l-4 4z"/></svg>
+            <span>Tải thư mục lên</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tree -->
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-link active" data-filter="all" data-trash="0">
+          <div class="nav-icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M19 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H5V4h14v16zm-7-2 5-6h-3V7h-4v5H7l5 6z"/></svg>
+          </div>
+          <span>Tất cả tệp</span>
+        </a>
+        <a href="#" class="nav-link" data-filter="video" data-trash="0">
+          <div class="nav-icon-wrap video-nav-icon">
+            <svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4zM8 17l6-3.5L8 10v7z"/></svg>
+          </div>
+          <span>Video & Phim</span>
+        </a>
+        <a href="#" class="nav-link" data-filter="image" data-trash="0">
+          <div class="nav-icon-wrap image-nav-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+          </div>
+          <span>Hình ảnh</span>
+        </a>
+        <a href="#" class="nav-link" data-filter="audio" data-trash="0">
+          <div class="nav-icon-wrap audio-nav-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+          </div>
+          <span>Âm thanh & Nhạc</span>
+        </a>
+        <a href="#" class="nav-link" data-filter="document" data-trash="0">
+          <div class="nav-icon-wrap doc-nav-icon">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+          </div>
+          <span>Tài liệu</span>
+        </a>
+        <a href="#" class="nav-link" data-filter="all" data-trash="1">
+          <div class="nav-icon-wrap trash-nav-icon">
+            <svg viewBox="0 0 24 24"><path d="M15 4V3H9v1H4v2h1v13c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V6h1V4h-5zm2 15H7V6h10v13zM9 8h2v9H9zm4 0h2v9h-2z"/></svg>
+          </div>
+          <span>Thùng rác</span>
+        </a>
+        <hr class="nav-divider" style="margin: 8px 12px; border: none; border-top: 1px solid var(--border-subtle);">
+        <a href="#" class="nav-link nav-vault-link" id="navVaultLink" data-vault="1" title="Thư mục bí mật bảo vệ bằng mã hóa AES-256-GCM">
+          <div class="nav-icon-wrap vault-nav-icon">
+            <svg viewBox="0 0 24 24"><path fill="#f43f5e" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+          </div>
+          <span>Thư mục bí mật</span>
+          <span class="vault-chip-status" id="vaultChipStatus">Khóa</span>
+        </a>
+      </nav>
+
+      <!-- Bottom Storage Card Widget -->
+      <div class="sidebar-storage">
+        <div class="storage-card">
+          <div class="storage-info-row">
+            <div class="storage-title-wrap">
+              <svg class="storage-icon" viewBox="0 0 24 24"><path d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z"/></svg>
+              <span class="storage-label">Ổ đĩa NAS</span>
+            </div>
+            <span class="storage-chip">600 GB</span>
+          </div>
+          <div class="storage-progress-bar">
+            <div class="storage-progress-fill" id="storageProgressFill" style="width: 1%;"></div>
+          </div>
+          <div class="storage-detail-text" id="storageDetailText">Đang đọc dung lượng...</div>
+          <div class="storage-badge-row">
+            <span class="storage-subbadge">⚡ RAM Cache 12ms</span>
+            <span class="storage-subbadge">Debian 12</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Stage -->
+    <main class="drive-stage" id="driveStage">
+      <!-- Top Stage Linear Loading Bar -->
+      <div class="stage-loading-bar" id="stageLoadingBar" hidden></div>
+
+      <!-- Breadcrumb Path Bar & Quick Toolbar -->
+      <div class="stage-topbar">
+        <div class="breadcrumb" id="breadcrumb">
+          <span class="crumb-item active" data-path="">
+            <svg class="crumb-home-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span>Drive của tôi</span>
+          </span>
+        </div>
+        <div class="stage-actions">
+          <button type="button" class="btn-subtle" id="toolbarImportDriveBtn" hidden title="Chọn tệp hoặc thư mục từ Drive chuyển vào Thư mục bí mật">
+            <svg viewBox="0 0 24 24"><path fill="#f43f5e" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <span>Thêm tệp từ Drive</span>
+          </button>
+          <button type="button" class="btn-subtle" id="toolbarLockVaultBtn" hidden title="Khóa Thư mục bí mật ngay lập tức">
+            <svg viewBox="0 0 24 24"><path fill="#f43f5e" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <span>Khóa Thư mục</span>
+          </button>
+          <button type="button" class="btn-subtle" id="toolbarVaultChangePwdBtn" hidden title="Đổi mật khẩu Thư mục bí mật">
+            <svg viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+            <span>Đổi mã PIN</span>
+          </button>
+          <button type="button" class="btn-subtle" id="toolbarNewFolderBtn">
+            <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-1 8h-3v3h-2v-3h-3v-2h3V9h2v3h3v2z"/></svg>
+            <span>Thư mục mới</span>
+          </button>
+          <button type="button" class="btn-primary" id="toolbarUploadBtn">
+            <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+            <span id="toolbarUploadBtnText">Tải tệp lên</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Selection Floating Action Bar (Hidden when no item is selected) -->
+      <div class="selection-floating-bar" id="selectionBar" hidden>
+        <div class="selection-bar-left">
+          <button type="button" class="btn-icon-select" id="clearSelectionBtn" title="Bỏ chọn (Esc)">✕</button>
+          <span class="selection-count-badge" id="selectionCountText">Đã chọn 1 mục</span>
+        </div>
+        <div class="selection-bar-actions">
+          <button type="button" class="btn-select-action" id="bulkDownloadBtn">
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span>Tải xuống</span>
+          </button>
+          <button type="button" class="btn-select-action" id="bulkMoveBtn" title="Di chuyển các mục đã chọn sang thư mục khác">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2zm8 9l-4-4v3H8v2h6v3l4-4z"/></svg>
+            <span>Di chuyển</span>
+          </button>
+          <button type="button" class="btn-select-action vault-action-btn" id="bulkVaultBtn" title="Chuyển các mục đã chọn vào Thư mục bí mật (Mã hóa AES-256)">
+            <svg viewBox="0 0 24 24"><path fill="#f43f5e" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <span>Chuyển vào Thư mục bí mật</span>
+          </button>
+          <button type="button" class="btn-select-action export-vault-btn" id="bulkExportVaultBtn" hidden title="Giải mã và đưa tệp về thư mục Drive">
+            <svg viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>
+            <span>Đưa về Drive</span>
+          </button>
+          <button type="button" class="btn-select-action danger" id="bulkTrashBtn">
+            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            <span id="bulkTrashBtnText">Chuyển vào Thùng rác</span>
+          </button>
+          <button type="button" class="btn-select-action" id="bulkRestoreBtn" hidden>
+            <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+            <span>Khôi phục</span>
+          </button>
+          <button type="button" class="btn-select-action danger" id="emptyTrashBtn" hidden>
+            <svg viewBox="0 0 24 24"><path d="M15 4V3H9v1H4v2h1v13c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V6h1V4h-5zm2 15H7V6h10v13zM9 8h2v9H9zm4 0h2v9h-2z"/></svg>
+            <span>Dọn sạch thùng rác</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- File Content Container (Grid / List) -->
+      <div class="file-view-container grid-mode" id="fileViewContainer">
+        <!-- Folders Section -->
+        <div class="section-container" id="foldersSection">
+          <div class="section-header-row">
+            <h4 class="section-title">Thư mục</h4>
+          </div>
+          <div class="items-grid folders-grid" id="foldersGrid"></div>
+        </div>
+
+        <!-- Files Section -->
+        <div class="section-container" id="filesSection">
+          <div class="section-header-row">
+            <h4 class="section-title">Tệp tin</h4>
+          </div>
+          <div class="items-grid files-grid" id="filesGrid"></div>
+          <div id="infiniteScrollSentinel" style="height: 20px; margin: 16px 0;"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" hidden>
+          <div class="empty-icon-bubble">
+            <svg class="empty-icon" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+          </div>
+          <h3>Thư mục trống</h3>
+          <p>Kéo và thả tệp trực tiếp vào đây hoặc nhấn nút "Tải lên" để lưu trữ vào phân vùng NAS 600GB NVMe.</p>
+          <button type="button" class="btn-primary" onclick="document.querySelector('#hiddenFileInput').click()">
+            <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+            <span>Tải tệp ngay</span>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Drag & Drop Fullscreen Overlay -->
+  <div class="drag-drop-overlay" id="dragDropOverlay" hidden>
+    <div class="drop-zone-card">
+      <div class="drop-icon-wrap">
+        <svg class="drop-icon" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+      </div>
+      <h2>Thả tệp vào đây</h2>
+      <p>Tệp tin sẽ được tải trực tiếp lên bộ nhớ NAS 600GB qua đường truyền tốc độ cao.</p>
+    </div>
+  </div>
+
+  <!-- Video Player Lightbox Modal (RFC 7233 Range 206 Streaming) -->
+  <div class="media-modal" id="videoModal" hidden>
+    <div class="modal-backdrop" id="videoBackdrop"></div>
+    <div class="video-modal-content">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge-video">VIDEO</span>
+          <span class="modal-title" id="videoTitle">Video</span>
+        </div>
+        <div class="modal-actions">
+          <a href="#" class="modal-action-btn" id="videoDownloadBtn" title="Tải xuống video" download>
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          </a>
+          <button type="button" class="modal-close-btn" id="closeVideoBtn" title="Đóng (Esc)">✕</button>
+        </div>
+      </div>
+      <div class="video-player-wrapper">
+        <video id="driveVideoPlayer" controls playsinline preload="metadata"></video>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Lightbox Modal -->
+  <div class="media-modal" id="imageModal" hidden>
+    <div class="modal-backdrop" id="imageBackdrop"></div>
+    <div class="image-modal-content">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge-image">ẢNH</span>
+          <span class="modal-title" id="imageTitle">Hình ảnh</span>
+        </div>
+        <div class="modal-actions">
+          <a href="#" class="modal-action-btn" id="imageDownloadBtn" title="Tải xuống" download>
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          </a>
+          <button type="button" class="modal-close-btn" id="closeImageBtn" title="Đóng (Esc)">✕</button>
+        </div>
+      </div>
+      <div class="image-preview-wrapper">
+        <img id="driveImagePreview" alt="Xem trước">
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Player Modal -->
+  <div class="media-modal" id="audioModal" hidden>
+    <div class="modal-backdrop" id="audioBackdrop"></div>
+    <div class="audio-modal-content">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge-audio">ÂM THANH</span>
+          <span class="modal-title" id="audioTitle">Nhạc & Podcast</span>
+        </div>
+        <div class="modal-actions">
+          <a href="#" class="modal-action-btn" id="audioDownloadBtn" title="Tải xuống bài hát" download>
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          </a>
+          <button type="button" class="modal-close-btn" id="closeAudioBtn" title="Đóng (Esc)">✕</button>
+        </div>
+      </div>
+      <div class="audio-player-wrapper">
+        <div class="audio-vinyl-stage">
+          <div class="audio-vinyl-disc" id="audioVinylDisc">
+            <div class="vinyl-center-art">
+              <svg viewBox="0 0 24 24"><path fill="#ffffff" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            </div>
+          </div>
+          <div class="audio-wave-bars" id="audioWaveBars">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="audio-track-info">
+          <h3 id="audioTrackName">Tên bài hát</h3>
+          <p id="audioTrackMeta">NAS NVMe Hi-Res Audio</p>
+        </div>
+        <!-- Progress Bar -->
+        <div class="audio-progress-container">
+          <span class="audio-time" id="audioCurTime">00:00</span>
+          <div class="audio-seeker-bar" id="audioSeekerBar">
+            <div class="audio-seek-buffer" id="audioSeekBuffer" style="width: 0%;"></div>
+            <div class="audio-seek-progress" id="audioSeekProgress" style="width: 0%;">
+              <span class="audio-seek-thumb"></span>
+            </div>
+          </div>
+          <span class="audio-time" id="audioTotalTime">00:00</span>
+        </div>
+        <!-- Main Controls -->
+        <div class="audio-controls-row">
+          <button type="button" class="audio-btn-subtle" id="audioRepeatBtn" title="Lặp lại danh sách">
+            <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+          </button>
+          <button type="button" class="audio-btn-step" id="audioPrevBtn" title="Bài trước (Shift + Left)">
+            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+          </button>
+          <button type="button" class="audio-btn-play" id="audioPlayBtn" title="Phát / Tạm dừng (Space)">
+            <svg id="audioPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="audioPauseIcon" viewBox="0 0 24 24" hidden><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          <button type="button" class="audio-btn-step" id="audioNextBtn" title="Bài tiếp (Shift + Right)">
+            <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+          <div class="audio-speed-wrap">
+            <button type="button" class="audio-btn-subtle" id="audioSpeedBtn" title="Tốc độ phát">1.0x</button>
+          </div>
+        </div>
+        <!-- Volume Control -->
+        <div class="audio-volume-row">
+          <button type="button" class="audio-vol-icon-btn" id="audioMuteBtn" title="Tắt / Bật tiếng">
+            <svg id="audioVolHighIcon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            <svg id="audioVolMuteIcon" viewBox="0 0 24 24" hidden><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+          </button>
+          <input type="range" class="audio-vol-slider" id="audioVolumeSlider" min="0" max="1" step="0.05" value="1">
+        </div>
+        <audio id="driveAudioPlayer" preload="auto"></audio>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF Document Viewer Modal -->
+  <div class="media-modal" id="pdfModal" hidden>
+    <div class="modal-backdrop" id="pdfBackdrop"></div>
+    <div class="pdf-modal-content">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge-pdf">PDF</span>
+          <span class="modal-title" id="pdfTitle">Tài liệu PDF</span>
+        </div>
+        <div class="modal-actions">
+          <a href="#" class="modal-action-btn" id="pdfDownloadBtn" title="Tải xuống PDF" download>
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          </a>
+          <a href="#" class="modal-action-btn" id="pdfOpenTabBtn" target="_blank" title="Mở trong tab mới">
+            <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+          <button type="button" class="modal-close-btn" id="closePdfBtn" title="Đóng (Esc)">✕</button>
+        </div>
+      </div>
+      <div class="pdf-viewer-wrapper">
+        <iframe id="drivePdfFrame" title="Xem trước PDF" src="about:blank"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code / Text Viewer Modal -->
+  <div class="media-modal" id="codeModal" hidden>
+    <div class="modal-backdrop" id="codeBackdrop"></div>
+    <div class="code-modal-content">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge-code" id="codeLanguageBadge">CODE</span>
+          <span class="modal-title" id="codeTitle">Mã nguồn & Văn bản</span>
+          <span class="modal-sub-badge" id="codeMetaInfo">0 dòng • 0 KB</span>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-subtle" id="copyCodeBtn" title="Sao chép toàn bộ nội dung">
+            <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            <span>Sao chép</span>
+          </button>
+          <a href="#" class="modal-action-btn" id="codeDownloadBtn" title="Tải xuống tệp" download>
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          </a>
+          <button type="button" class="modal-close-btn" id="closeCodeBtn" title="Đóng (Esc)">✕</button>
+        </div>
+      </div>
+      <div class="code-viewer-wrapper">
+        <div class="code-loading" id="codeLoading" hidden>Đang đọc nội dung tệp...</div>
+        <pre class="code-pre"><code id="codeViewerContent"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Properties / Details Modal -->
+  <div class="prompt-dialog" id="fileDetailsModal" hidden>
+    <div class="dialog-card file-details-card" style="max-width: 520px; width: 95vw;">
+      <div class="dialog-header">
+        <div class="dialog-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">
+          <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #6366f1;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        </div>
+        <div>
+          <h3 id="fdModalTitle">Chi tiết tệp tin</h3>
+          <p id="fdModalSubTitle" style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Thông tin tệp trên phân vùng NAS</p>
+        </div>
+      </div>
+      <div class="file-details-body">
+        <div class="fd-row"><span class="fd-label">Tên tệp:</span><span class="fd-val" id="fdName">--</span></div>
+        <div class="fd-row"><span class="fd-label">Loại tệp:</span><span class="fd-val" id="fdType">--</span></div>
+        <div class="fd-row"><span class="fd-label">Dung lượng:</span><span class="fd-val" id="fdSize">--</span></div>
+        <div class="fd-row"><span class="fd-label">Vị trí:</span><span class="fd-val" id="fdPath">--</span></div>
+        <div class="fd-row"><span class="fd-label">Thời gian:</span><span class="fd-val" id="fdDate">--</span></div>
+        <hr class="dropdown-divider" style="margin: 12px 0;">
+        <div class="fd-link-block">
+          <label class="fd-label">Liên kết tải xuống:</label>
+          <div class="fd-copy-input-row">
+            <input type="text" id="fdDownloadUrlInput" readonly>
+            <button type="button" class="btn-subtle" id="fdCopyDownloadBtn">Sao chép</button>
+          </div>
+        </div>
+        <div class="fd-link-block" id="fdStreamBlock" style="margin-top: 8px;">
+          <label class="fd-label">Liên kết Stream trực tiếp:</label>
+          <div class="fd-copy-input-row">
+            <input type="text" id="fdStreamUrlInput" readonly>
+            <button type="button" class="btn-subtle" id="fdCopyStreamBtn">Sao chép</button>
+          </div>
+        </div>
+      </div>
+      <div class="dialog-actions" style="margin-top: 16px; justify-content: flex-end;">
+        <button type="button" class="btn-dialog-confirm" id="closeFileDetailsBtn">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- New Folder Modal -->
+  <div class="prompt-dialog" id="newFolderModal" hidden>
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div class="dialog-icon folder-dialog-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-1 8h-3v3h-2v-3h-3v-2h3V9h2v3h3v2z"/></svg>
+        </div>
+        <h3>Thư mục mới</h3>
+      </div>
+      <input type="text" id="newFolderNameInput" placeholder="Nhập tên thư mục..." autocomplete="off">
+      <div class="dialog-actions">
+        <button type="button" class="btn-dialog-cancel" id="cancelNewFolderBtn">Hủy bỏ</button>
+        <button type="button" class="btn-dialog-confirm" id="confirmNewFolderBtn">Tạo mới</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rename Modal -->
+  <div class="prompt-dialog" id="renameModal" hidden>
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div class="dialog-icon edit-dialog-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </div>
+        <h3>Đổi tên</h3>
+      </div>
+      <input type="text" id="renameInput" autocomplete="off">
+      <div class="dialog-actions">
+        <button type="button" class="btn-dialog-cancel" id="cancelRenameBtn">Hủy</button>
+        <button type="button" class="btn-dialog-confirm" id="confirmRenameBtn">Lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Progress Drawer -->
+  <div class="upload-drawer" id="uploadDrawer" hidden>
+    <div class="drawer-header">
+      <div class="drawer-header-left">
+        <span class="drawer-pulse-dot"></span>
+        <span class="drawer-title" id="drawerTitle">Đang tải lên...</span>
+      </div>
+      <div class="drawer-header-actions">
+        <button type="button" class="drawer-action-btn" id="minimizeDrawerBtn" title="Thu nhỏ / Mở rộng">—</button>
+        <button type="button" class="drawer-action-btn" id="closeDrawerBtn" title="Đóng">✕</button>
+      </div>
+    </div>
+    <div class="drawer-items-list" id="drawerItemsList"></div>
+  </div>
+
+  <!-- Login Screen Modal -->
+  <div class="auth-modal" id="loginModal" hidden>
+    <div class="auth-backdrop"></div>
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="brand-logo-wrap">
+          <svg class="brand-logo-svg" viewBox="0 0 32 32">
+            <defs>
+              <linearGradient id="authBrandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#a855f7"/>
+              </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="9" fill="url(#authBrandGrad)"/>
+            <path fill="#ffffff" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z" transform="translate(4, 5) scale(0.75)"/>
+          </svg>
+          <span class="brand-glow"></span>
+        </div>
+        <div class="auth-title-block">
+          <h2>NAS <span class="drive-title-accent">Cloud Drive</span></h2>
+          <p class="auth-subtitle">Đăng nhập để truy cập kho lưu trữ 600GB NVMe</p>
+        </div>
+      </div>
+
+      <form id="loginForm" class="auth-form" autocomplete="on">
+        <div class="auth-error-banner" id="loginErrorBanner" hidden></div>
+
+        <div class="auth-input-group">
+          <label for="loginUsername">Tên đăng nhập</label>
+          <div class="auth-input-wrap">
+            <svg class="auth-input-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <input type="text" id="loginUsername" name="username" placeholder="Nhập tên đăng nhập..." required autocomplete="username" autofocus>
+          </div>
+        </div>
+
+        <div class="auth-input-group">
+          <label for="loginPassword">Mật khẩu</label>
+          <div class="auth-input-wrap">
+            <svg class="auth-input-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <input type="password" id="loginPassword" name="password" placeholder="Nhập mật khẩu..." required autocomplete="current-password">
+            <button type="button" class="auth-eye-btn" id="toggleLoginPasswordBtn" title="Hiện / Ẩn mật khẩu">
+              <svg id="eyeShowIcon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+              <svg id="eyeHideIcon" viewBox="0 0 24 24" hidden><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-auth-submit" id="loginSubmitBtn">
+          <span class="btn-text">Đăng nhập</span>
+          <span class="btn-spinner" hidden></span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="prompt-dialog" id="changePasswordModal" hidden>
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div class="dialog-icon change-pwd-dialog-icon">
+          <svg viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+        </div>
+        <h3>Đổi mật khẩu tài khoản</h3>
+      </div>
+      <div class="auth-error-banner" id="changePasswordErrorBanner" hidden></div>
+      <div class="dialog-input-group">
+        <label for="oldPasswordInput">Mật khẩu hiện tại</label>
+        <input type="password" id="oldPasswordInput" placeholder="Nhập mật khẩu hiện tại..." autocomplete="current-password">
+      </div>
+      <div class="dialog-input-group">
+        <label for="newPasswordInput">Mật khẩu mới</label>
+        <input type="password" id="newPasswordInput" placeholder="Tối thiểu 6 ký tự..." autocomplete="new-password">
+      </div>
+      <div class="dialog-input-group">
+        <label for="confirmPasswordInput">Xác nhận mật khẩu mới</label>
+        <input type="password" id="confirmPasswordInput" placeholder="Nhập lại mật khẩu mới..." autocomplete="new-password">
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn-dialog-cancel" id="cancelChangePasswordBtn">Hủy bỏ</button>
+        <button type="button" class="btn-dialog-confirm" id="confirmChangePasswordBtn">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vault Unlock & Setup Modal -->
+  <div class="prompt-dialog" id="vaultAuthModal" hidden>
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div class="dialog-icon vault-dialog-icon">
+          <svg viewBox="0 0 24 24"><path fill="#f43f5e" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        </div>
+        <h3 id="vaultModalTitle">Mở khóa Thư mục bí mật</h3>
+      </div>
+      <p class="vault-dialog-desc" id="vaultModalDesc">Thư mục bí mật được bảo vệ bằng lớp khóa an toàn tuyệt đối. Nhập mật khẩu để tiếp tục.</p>
+      <div class="auth-error-banner" id="vaultModalErrorBanner" hidden></div>
+      <div class="dialog-input-group">
+        <label for="vaultPasswordInput" id="vaultPasswordLabel">Mật khẩu Thư mục bí mật</label>
+        <input type="password" id="vaultPasswordInput" placeholder="Nhập mật khẩu Thư mục bí mật..." autocomplete="current-password">
+      </div>
+      <div class="dialog-input-group" id="vaultConfirmGroup" hidden>
+        <label for="vaultConfirmPasswordInput">Xác nhận mật khẩu</label>
+        <input type="password" id="vaultConfirmPasswordInput" placeholder="Nhập lại mật khẩu..." autocomplete="new-password">
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn-dialog-cancel" id="cancelVaultAuthBtn">Hủy bỏ</button>
+        <button type="button" class="btn-dialog-confirm btn-vault-confirm" id="confirmVaultAuthBtn">Mở khóa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Chọn tệp từ Drive chuyển vào Thư mục bí mật -->
+  <div class="prompt-dialog" id="pickDriveModal" hidden>
+    <div class="dialog-card" style="max-width: 540px; width: 95vw;">
+      <div class="dialog-header">
+        <div class="dialog-icon vault-dialog-icon">
+          <svg viewBox="0 0 24 24"><path fill="#f43f5e" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        </div>
+        <div>
+          <h3>Chuyển tệp từ Drive vào Thư mục bí mật</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Chọn các tệp hoặc thư mục muốn mã hóa và chuyển vào đây</p>
+        </div>
+      </div>
+      <div id="drivePickerContent" style="max-height: 320px; overflow-y: auto; margin: 12px 0; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px;">
+        <div style="text-align: center; padding: 20px; color: var(--text-muted);">Đang nạp danh sách tệp...</div>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px;">
+        <span id="drivePickerCountText" style="font-size: 13px; font-weight: 600; color: #f43f5e;">Đã chọn 0 mục</span>
+        <div class="dialog-actions" style="margin-top: 0;">
+          <button type="button" class="btn-dialog-cancel" id="cancelPickDriveBtn">Hủy</button>
+          <button type="button" class="btn-dialog-confirm btn-vault-confirm" id="confirmPickDriveBtn" disabled>Chuyển vào Thư mục bí mật</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Di chuyển tệp / thư mục (Folder Picker) -->
+  <div class="prompt-dialog" id="moveModal" hidden>
+    <div class="dialog-card move-dialog-card" style="max-width: 520px; width: 95vw;">
+      <div class="dialog-header">
+        <div class="dialog-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">
+          <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #6366f1;"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2zm8 9l-4-4v3H8v2h6v3l4-4z"/></svg>
+        </div>
+        <div>
+          <h3 id="moveModalTitle">Di chuyển mục</h3>
+          <p id="moveModalSubTitle" style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Chọn thư mục đích để di chuyển</p>
+        </div>
+      </div>
+      <div class="move-picker-wrapper">
+        <div class="move-picker-breadcrumb" id="movePickerBreadcrumb"></div>
+        <div class="move-picker-list" id="movePickerList"></div>
+      </div>
+      <div class="dialog-actions move-dialog-actions" style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px;">
+        <button type="button" class="btn-dialog-secondary" id="moveNewFolderBtn" title="Tạo thư mục mới tại vị trí này">
+          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor; margin-right: 4px; vertical-align: middle;"><path d="M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-1 8h-3v3h-2v-3h-3v-2h3v-3h2v3h3v2z"/></svg>
+          <span>Thư mục mới</span>
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-dialog-cancel" id="cancelMoveBtn">Hủy</button>
+          <button type="button" class="btn-dialog-confirm btn-move-confirm" id="confirmMoveBtn">Di chuyển vào đây</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vault Change Password Modal -->
+  <div class="prompt-dialog" id="vaultChangePwdModal" hidden>
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div class="dialog-icon vault-dialog-icon">
+          <svg viewBox="0 0 24 24"><path fill="#f43f5e" d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+        </div>
+        <h3>Đổi mật khẩu Thư mục bí mật</h3>
+      </div>
+      <div class="auth-error-banner" id="vaultChangePwdErrorBanner" hidden></div>
+      <div class="dialog-input-group">
+        <label for="vaultOldPwdInput">Mật khẩu hiện tại</label>
+        <input type="password" id="vaultOldPwdInput" placeholder="Nhập mật khẩu hiện tại...">
+      </div>
+      <div class="dialog-input-group">
+        <label for="vaultNewPwdInput">Mật khẩu mới</label>
+        <input type="password" id="vaultNewPwdInput" placeholder="Tối thiểu 6 ký tự...">
+      </div>
+      <div class="dialog-input-group">
+        <label for="vaultConfirmNewPwdInput">Xác nhận mật khẩu mới</label>
+        <input type="password" id="vaultConfirmNewPwdInput" placeholder="Nhập lại mật khẩu mới...">
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn-dialog-cancel" id="cancelVaultChangePwdBtn">Hủy</button>
+        <button type="button" class="btn-dialog-confirm btn-vault-confirm" id="confirmVaultChangePwdBtn">Lưu & Tái mã hóa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standalone File Encrypt / Decrypt Prompt Dialog -->
+  <div class="prompt-dialog" id="fileCryptoModal" hidden>
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div class="dialog-icon vault-dialog-icon">
+          <svg viewBox="0 0 24 24"><path fill="#f43f5e" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        </div>
+        <h3 id="fileCryptoTitle">Mã hóa tệp tin</h3>
+      </div>
+      <p class="vault-dialog-desc" id="fileCryptoDesc">Nhập mật khẩu để mã hóa hoặc giải mã tệp tin này bằng AES-256-GCM.</p>
+      <div class="auth-error-banner" id="fileCryptoErrorBanner" hidden></div>
+      <div class="dialog-input-group">
+        <label for="fileCryptoPasswordInput">Mật khẩu bảo vệ</label>
+        <input type="password" id="fileCryptoPasswordInput" placeholder="Nhập mật khẩu...">
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn-dialog-cancel" id="cancelFileCryptoBtn">Hủy</button>
+        <button type="button" class="btn-dialog-confirm btn-vault-confirm" id="confirmFileCryptoBtn">Thực hiện</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vault Background Import Progress Card -->
+  <div class="vault-progress-card" id="vaultProgressCard" hidden>
+    <div class="vpc-header">
+      <div class="vpc-title">
+        <span class="vpc-icon">🔒</span>
+        <span class="vpc-text">Chuyển vào Thư mục bí mật</span>
+      </div>
+      <span class="vpc-percent" id="vpcPercent">0%</span>
+    </div>
+    <div class="vpc-bar-bg">
+      <div class="vpc-bar-fill" id="vpcBarFill" style="width: 0%"></div>
+    </div>
+    <div class="vpc-detail">
+      <span id="vpcCount">0 / 0</span>
+      <span class="vpc-filename" id="vpcFileName">Đang xử lý...</span>
+    </div>
+  </div>
+
+  <!-- Hidden File & Folder Inputs -->
+  <input type="file" id="hiddenFileInput" multiple hidden>
+  <input type="file" id="hiddenFolderInput" webkitdirectory directory multiple hidden>
+
+  <script src="app.js?v=20261103-move"></script>
+</body>
+</html>

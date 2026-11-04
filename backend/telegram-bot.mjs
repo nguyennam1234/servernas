@@ -1,7 +1,4 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
-import https from 'node:https';
+lanIp: config.lanIp || process.env.NAS_LAN_IP || 'LAN:8080', 'node:https';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 
@@ -38,7 +35,7 @@ function loadConfig() {
 
 function saveConfig(cfg) {
   try {
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2), 'utf8');
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2), { encoding: 'utf8', mode: 0o600 });
   } catch (err) {
     console.error('[Save Config Error]:', err.message);
   }
@@ -270,8 +267,8 @@ function getSystemMetrics() {
     txTotal: formatBytes(txBytes),
     isNasRunning,
     isCloudflareRunning,
-    lanIp: '192.168.88.230:8080',
-    wanDomain: 'https://luutru.npccc.io.vn'
+    lanIp: config.lanIp || process.env.NAS_LAN_IP || 'LAN:8080',
+    wanDomain: config.wanDomain || process.env.NAS_WAN_DOMAIN || 'WAN'
   };
 }
 
@@ -541,10 +538,8 @@ async function handleCommand(msg) {
   if (!chatId || !text) return;
 
   if (!config.chatId) {
-    config.chatId = String(chatId);
-    saveConfig(config);
     const m = getSystemMetrics();
-    await sendTelegramWithKeyboard(chatId, `🎉 <b>KẾT NỐI THÀNH CÔNG!</b>\n\nChào mừng <b>${escapeHtml(username)}</b>! Chat ID của bạn (<code>${chatId}</code>) đã được lưu làm Quản trị viên duy nhất.\n\n` + renderDashboard(m), getDashboardKeyboard());
+    await await sendTelegramWithKeyboard(chatId, `Yêu cầu quản trị viên cấu hình chatId trong telegram-config.json trên máy chủ.`);
     return;
   }
 

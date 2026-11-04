@@ -3669,3 +3669,81 @@ setInterval(async () => {
     }
   } catch (_) {}
 }, 5 * 60 * 1000);
+// === BỔ SUNG TÍNH NĂNG: SẮP XẾP, CHỌN TẤT CẢ (CTRL+A), XOAY/ZOOM ẢNH & SỬA VĂN BẢN ===
+(function initNasExtraFeatures() {
+  const sortSelect = document.getElementById('sortSelect');
+  const savedSort = localStorage.getItem('nas_sort_by') || 'name-asc';
+  if (sortSelect) sortSelect.value = savedSort;
+
+  function applySortItems() {
+    if (!state || !Array.isArray(state.items)) return;
+    const mode = (sortSelect && sortSelect.value) || localStorage.getItem('nas_sort_by') || 'name-asc';
+    state.items.sort((a, b) => {
+      if (!!a.isFolder !== !!b.isFolder) return a.isFolder ? -1 : 1;
+      if (mode === 'name-desc') return String(b.name || '').localeCompare(String(a.name || ''), 'vi');
+      if (mode === 'date-desc') return (new Date(b.mtime || b.updatedAt || 0) - new Date(a.mtime || a.updatedAt || 0));
+      if (mode === 'date-asc') return (new Date(a.mtime || a.updatedAt || 0) - new Date(b.mtime || b.updatedAt || 0));
+      if (mode === 'size-desc') return (Number(b.size || 0) - Number(a.size || 0));
+      if (mode === 'size-asc') return (Number(a.size || 0) - Number(b.size || 0));
+      return String(a.name || '').localeCompare(String(a.name || ''), 'vi');
+    });
+  }
+
+  if (typeof renderItems === 'function') {
+    const origRenderItems = renderItems;
+    renderItems = function (...args) {
+      applySortItems();
+      return origRenderItems.apply(this, args);
+    };
+  }
+
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      localStorage.setItem('nas_sort_by', sortSelect.value);
+      if (typeof renderItems === 'function') renderItems();
+    });
+  }
+
+  // Công cụ Xoay & Phóng to ảnh trong Image Modal
+  const imgModalActions = document.querySelector('#imageModal .media-modal-actions');
+  const imgPreview = document.getElementById('driveImagePreview');
+  if (imgModalActions && imgPreview && !document.getElementById('imgRotateBtn')) {
+    let zoom = 1, deg = 0;
+    const updateTransform = () => { imgPreview.style.transform = `scale(${zoom}) rotate(${deg}deg)`; imgPreview.style.transition = 'transform 0.2s ease'; };
+    const mkBtn = (id, txt, fn) => {
+      const b = document.createElement('button');
+      b.id = id; b.className = 'btn-media-download'; b.textContent = txt; b.type = 'button';
+      b.addEventListener('click', fn);
+      imgModalActions.insertBefore(b, imgModalActions.firstChild);
+    };
+    mkBtn('imgRotateBtn', '↻ Xoay', () => { deg = (deg + 90) % 360; updateTransform(); });
+    mkBtn('imgZoomInBtn', '🔍+', () => { zoom = Math.min(4, +(zoom + 0.25).toFixed(2)); updateTransform(); });
+    mkBtn('imgZoomOutBtn', '🔍-', () => { zoom = Math.max(0.5, +(zoom - 0.25).toFixed(2)); updateTransform(); });
+    imgPreview.addEventListener('load', () => { zoom = 1; deg = 0; updateTransform(); });
+  }
+
+  // Chỉnh sửa & Lưu trực tiếp tệp văn bản trong Code Modal + Tạo tệp văn bản mới
+  const codeActions = document.querySelector('#codeModal .media-modal-actions');
+  const codeContent = document.getElementById('codeViewerContent');
+  const codeTitle = document.getElementById('codeTitle');
+  if (codeActions && codeContent && !document.getElementById('editCodeBtn')) {
+    const editBtn = document.createElement('button');
+    editBtn.id = 'editCodeBtn'; editBtn.className = 'btn-media-download'; editBtn.textContent = '✏️ Sửa & Lưu';
+    editBtn.addEventListener('click', async () => {
+      if (codeContent.isContentEditable) {
+        const fileName = (codeTitle && codeTitle.textContent.trim()) || 'note.txt';
+        const blob = new File([codeContent.innerText], fileName, { type: 'text/plain;charset=utf-8' });
+        codeContent.contentEditable = 'false';
+        codeContent.style.outline = 'none';
+        editBtn.textContent = '✏️ Sửa & Lưu';
+        if (typeof uploadFiles === 'function') await uploadFiles([blob]);
+      } else {
+        codeContent.contentEditable = 'true';
+        codeContent.style.outline = '1px dashed var(--accent-indigo, #6366f1)';
+        codeContent.focus();
+        editBtn.textContent = '💾 Lưu lên NAS';
+      }
+    });
+    codeActions.insertBefore(editBtn, codeActions.firstChild);
+  }
+})();

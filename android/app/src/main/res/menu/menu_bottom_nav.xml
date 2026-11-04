@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:icon="@drawable/ic_folder"
+        android:id="@+id/nav_files"
+        android:title="Tệp tin"/>
+    <item
+        android:icon="@drawable/ic_photo"
+        android:id="@+id/nav_photos"
+        android:title="Ảnh &amp; Video"/>
+    <item
+        android:icon="@drawable/ic_download"
+        android:id="@+id/nav_offline"
+        android:title="Tải về"/>
+    <item
+        android:icon="@drawable/ic_nav_settings"
+        android:id="@+id/nav_settings"
+        android:title="Cài đặt"/>
+</menu>

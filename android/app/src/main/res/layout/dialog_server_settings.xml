@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <TextView
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chọn hoặc nhập địa chỉ máy chủ:"/>
+    <RadioGroup
+        android:id="@+id/radioGroupPresets"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp">
+        <RadioButton
+            android:id="@+id/rbAuto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Tự động (Ưu tiên LAN 1Gbps, ngoài nhà dùng Cloudflare)"/>
+        <RadioButton
+            android:id="@+id/rbLan88"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="LAN MikroTik (http://192.168.88.230:8080)"/>
+        <RadioButton
+            android:id="@+id/rbLan1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="LAN Modem FPT (http://192.168.1.8:8080)"/>
+        <RadioButton
+            android:id="@+id/rbNasLan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tên miền LAN (http://nas.lan:8080)"/>
+        <RadioButton
+            android:id="@+id/rbWan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Internet Cloudflare (https://luutru.npccc.io.vn)"/>
+        <RadioButton
+            android:id="@+id/rbCustom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Địa chỉ tùy chỉnh:"/>
+    </RadioGroup>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilCustomUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="http://ip-may-chu:8080"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCustomUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:inputType="textUri"/>
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>

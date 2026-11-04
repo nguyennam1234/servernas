@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@drawable/bg_sheet"
+    android:padding="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <View
+        android:layout_gravity="center_horizontal"
+        android:background="#d0d5dd"
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_marginBottom="16dp"/>
+    <TextView
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kết nối Máy chủ NAS"/>
+    <TextView
+        android:textSize="13sp"
+        android:textColor="@color/text_secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"
+        android:text="Chọn máy chủ kết nối hoặc tự động chọn đường truyền nhanh nhất"/>
+    <RadioGroup
+        android:id="@+id/rgServerOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RadioButton
+            android:textSize="14sp"
+            android:textColor="@color/text_primary"
+            android:id="@+id/rbAutoDetect"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="�� Tự động phát hiện (Ưu tiên LAN tốc độ cao)"
+            android:paddingVertical="8dp"/>
+        <RadioButton
+            android:textSize="14sp"
+            android:textColor="@color/text_primary"
+            android:id="@+id/rbServerLan88"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="⚡ LAN Lớp 2: http://192.168.88.230:8080"
+            android:paddingVertical="8dp"/>
+        <RadioButton
+            android:textSize="14sp"
+            android:textColor="@color/text_primary"
+            android:id="@+id/rbServerLan1"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="⚡ LAN Lớp 1: http://192.168.1.8:8080"
+            android:paddingVertical="8dp"/>
+        <RadioButton
+            android:textSize="14sp"
+            android:textColor="@color/text_primary"
+            android:id="@+id/rbServerDomain"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="�� Tên miền nội bộ: http://nas.lan:8080"
+            android:paddingVertical="8dp"/>
+        <RadioButton
+            android:textSize="14sp"
+            android:textColor="@color/text_primary"
+            android:id="@+id/rbServerWan"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="�� Cloudflare WAN: https://luutru.npccc.io.vn"
+            android:paddingVertical="8dp"/>
+        <RadioButton
+            android:textSize="14sp"
+            android:textColor="@color/text_primary"
+            android:id="@+id/rbServerCustom"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="✏️ Địa chỉ tùy chỉnh"
+            android:paddingVertical="8dp"/>
+    </RadioGroup>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilCustomUrl"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Nhập địa chỉ máy chủ (vd: http://192.168.88.230:8080)"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtCustomUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textUri"/>
+    </com.google.android.material.textfield.TextInputLayout>
+    <TextView
+        android:textSize="12sp"
+        android:textColor="@color/text_secondary"
+        android:id="@+id/txtPingResults"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Kiểm tra độ trễ mạng..."/>
+    <LinearLayout
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSheetPingTest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Đo tốc độ ping"
+            app:icon="@drawable/ic_refresh"
+            style="@style/Widget.Material3.Button.TextButton"/>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSheetApply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Áp dụng"
+            android:layout_marginStart="8dp"
+            app:cornerRadius="20dp"/>
+    </LinearLayout>
+</LinearLayout>

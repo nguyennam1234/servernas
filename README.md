@@ -47,6 +47,12 @@
 
 ```
 servernas/
+├── android/                          # Mã nguồn ứng dụng Native Android (Android Studio)
+│   ├── app/src/main/java/com/nasdrive/app/ # Bộ mã nguồn xử lý logic ứng dụng
+│   ├── app/src/main/res/             # Giao diện XML (14 layouts, drawables, theme tokens)
+│   ├── app/src/main/AndroidManifest.xml
+│   ├── app/build.gradle              # Cấu hình Gradle module app
+│   └── gradlew, build.gradle         # Gradle Wrapper dự án Android Studio
 ├── backend/
 │   ├── server.mjs                    # Máy chủ chính (API, Auth, Streaming, Vault Engine)
 │   ├── telegram-bot.mjs              # Bot Telegram giám sát & cảnh báo máy chủ

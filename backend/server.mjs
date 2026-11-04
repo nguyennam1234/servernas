@@ -41,7 +41,7 @@ try {
   }
   if (!ADMIN_SECRET || ADMIN_SECRET.length < 16) {
     ADMIN_SECRET = crypto.randomBytes(32).toString('hex');
-    fs.writeFileSync(ADMIN_SECRET_PATH, ADMIN_SECRET, { mode: 0o600, encoding: 'utf8' });
+    fs.writeFileSync(ADMIN_SECRET_PATH, ADMIN_SECRET, { encoding: 'utf8', mode: 0o600 });
   }
 } catch (e) {
   console.error('[NAS Security] Không thể đọc/ghi .admin_secret:', e.message);
@@ -95,14 +95,14 @@ function loadUsers() {
   const defaultAdmin = {
     id: 'user_admin',
     username: 'admin',
-    password_hash: hashPassword('Admin@NAS2026!'),
+    password_hash: hashPassword((process.env.INITIAL_ADMIN_PASSWORD || crypto.randomBytes(12).toString('base64url'))),
     full_name: 'Quản trị viên',
     role: 'admin',
     created_at: new Date().toISOString()
   };
   const list = [defaultAdmin];
   try {
-    fs.writeFileSync(USERS_FILE_PATH, JSON.stringify(list, null, 2), { mode: 0o600, encoding: 'utf8' });
+    fs.writeFileSync(USERS_FILE_PATH, JSON.stringify(list, null, 2), { encoding: 'utf8', mode: 0o600 });
     console.log('[Auth] Đã khởi tạo tài khoản quản trị mặc định: admin / Admin@NAS2026!');
   } catch (e) {
     console.error('[Auth] Không thể ghi users.json:', e.message);
@@ -112,7 +112,7 @@ function loadUsers() {
 
 function saveUsers(list) {
   try {
-    fs.writeFileSync(USERS_FILE_PATH, JSON.stringify(list, null, 2), { mode: 0o600, encoding: 'utf8' });
+    fs.writeFileSync(USERS_FILE_PATH, JSON.stringify(list, null, 2), { encoding: 'utf8', mode: 0o600 });
   } catch (e) {
     console.error('[Auth] Lỗi lưu users.json:', e.message);
   }
@@ -141,7 +141,7 @@ function saveSessions() {
     for (const [tok, s] of sessions.entries()) {
       obj[tok] = s;
     }
-    fs.writeFileSync(SESSIONS_FILE_PATH, JSON.stringify(obj, null, 2), { mode: 0o600, encoding: 'utf8' });
+    fs.writeFileSync(SESSIONS_FILE_PATH, JSON.stringify(obj, null, 2), { encoding: 'utf8', mode: 0o600 });
   } catch (_) {}
 }
 
@@ -178,9 +178,9 @@ function parseCookies(req) {
   return list;
 }
 
-function getAuthUser(req, url) {
+function safeVaultResolve(req, url) {
   // 1. Kiểm tra Admin Key (CLI hoặc Bot Telegram)
-  const providedKey = req.headers['x-admin-key'] || (url ? url.searchParams.get('admin_key') : '');
+  const providedKey = req.headers['x-admin-key'] || '';
   if (providedKey && safeCompare(providedKey, ADMIN_SECRET)) {
     return { id: 'admin_key', username: 'admin', role: 'admin', full_name: 'Admin Key' };
   }
@@ -318,7 +318,7 @@ function getVaultConfig() {
 }
 
 function saveVaultConfig(cfg) {
-  fs.writeFileSync(VAULT_CONFIG_PATH, JSON.stringify(cfg, null, 2), { mode: 0o600, encoding: 'utf8' });
+  fs.writeFileSync(VAULT_CONFIG_PATH, JSON.stringify(cfg, null, 2), { encoding: 'utf8', mode: 0o600 });
 }
 
 function deriveVaultKey(password, salt) {
@@ -809,7 +809,7 @@ function getSafeUniqueFilePath(targetDir, rawFilename) {
   let safeStem = stem || 'file';
 
   // Thử tên ban đầu
-  let finalName = `${base}${ext}`;
+  let finalName = `${safeStem}${ext}`;
   let finalPath = path.join(targetDir, finalName);
 
   // Nếu file đã tồn tại trên đĩa HOẶC đang được một luồng upload khác giữ chỗ tên này
